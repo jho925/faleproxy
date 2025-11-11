@@ -1,6 +1,20 @@
 const cheerio = require('cheerio');
 const { sampleHtmlWithYale } = require('./test-utils');
 
+// Helper function to replace Yale with Fale while preserving case
+function replaceYaleWithFale(text) {
+  return text.replace(/Yale/gi, (match) => {
+    if (match === 'YALE') return 'FALE';
+    if (match === 'Yale') return 'Fale';
+    if (match === 'yale') return 'fale';
+    // Handle other cases like YaLe, yAlE, etc. - preserve first letter case
+    if (match[0] === match[0].toUpperCase()) {
+      return 'Fale';
+    }
+    return 'fale';
+  });
+}
+
 describe('Yale to Fale replacement logic', () => {
   
   test('should replace Yale with Fale in text content', () => {
@@ -12,14 +26,14 @@ describe('Yale to Fale replacement logic', () => {
     }).each(function() {
       // Replace text content but not in URLs or attributes
       const text = $(this).text();
-      const newText = text.replace(/Yale/g, 'Fale').replace(/yale/g, 'fale');
+      const newText = replaceYaleWithFale(text);
       if (text !== newText) {
         $(this).replaceWith(newText);
       }
     });
     
     // Process title separately
-    const title = $('title').text().replace(/Yale/g, 'Fale').replace(/yale/g, 'fale');
+    const title = replaceYaleWithFale($('title').text());
     $('title').text(title);
     
     const modifiedHtml = $.html();
@@ -57,7 +71,7 @@ describe('Yale to Fale replacement logic', () => {
       </head>
       <body>
         <h1>Hello World</h1>
-        <p>This is a test page with no Yale references.</p>
+        <p>This is a test page with no references.</p>
       </body>
       </html>
     `;
@@ -69,7 +83,7 @@ describe('Yale to Fale replacement logic', () => {
       return this.nodeType === 3;
     }).each(function() {
       const text = $(this).text();
-      const newText = text.replace(/Yale/g, 'Fale').replace(/yale/g, 'fale');
+      const newText = replaceYaleWithFale(text);
       if (text !== newText) {
         $(this).replaceWith(newText);
       }
@@ -80,7 +94,7 @@ describe('Yale to Fale replacement logic', () => {
     // Content should remain the same
     expect(modifiedHtml).toContain('<title>Test Page</title>');
     expect(modifiedHtml).toContain('<h1>Hello World</h1>');
-    expect(modifiedHtml).toContain('<p>This is a test page with no Yale references.</p>');
+    expect(modifiedHtml).toContain('<p>This is a test page with no references.</p>');
   });
 
   test('should handle case-insensitive replacements', () => {
@@ -94,7 +108,7 @@ describe('Yale to Fale replacement logic', () => {
       return this.nodeType === 3;
     }).each(function() {
       const text = $(this).text();
-      const newText = text.replace(/Yale/gi, 'Fale');
+      const newText = replaceYaleWithFale(text);
       if (text !== newText) {
         $(this).replaceWith(newText);
       }

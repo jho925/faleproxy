@@ -4,6 +4,20 @@ const express = require('express');
 const path = require('path');
 const { sampleHtmlWithYale } = require('./test-utils');
 
+// Helper function to replace Yale with Fale while preserving case
+function replaceYaleWithFale(text) {
+  return text.replace(/Yale/gi, (match) => {
+    if (match === 'YALE') return 'FALE';
+    if (match === 'Yale') return 'Fale';
+    if (match === 'yale') return 'fale';
+    // Handle other cases like YaLe, yAlE, etc. - preserve first letter case
+    if (match[0] === match[0].toUpperCase()) {
+      return 'Fale';
+    }
+    return 'fale';
+  });
+}
+
 // Import app but don't let it listen on a port (we'll use supertest for that)
 // Create a test app with the same route handlers
 const testApp = express();
@@ -33,14 +47,14 @@ testApp.post('/fetch', async (req, res) => {
     }).each(function() {
       // Replace text content but not in URLs or attributes
       const text = $(this).text();
-      const newText = text.replace(/Yale/g, 'Fale').replace(/yale/g, 'fale');
+      const newText = replaceYaleWithFale(text);
       if (text !== newText) {
         $(this).replaceWith(newText);
       }
     });
     
     // Process title separately
-    const title = $('title').text().replace(/Yale/g, 'Fale').replace(/yale/g, 'fale');
+    const title = replaceYaleWithFale($('title').text());
     $('title').text(title);
     
     return res.json({ 
